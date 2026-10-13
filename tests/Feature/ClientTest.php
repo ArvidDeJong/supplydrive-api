@@ -141,7 +141,7 @@ it('returns an empty list for a body that is not a list of messages', function (
 })->with([
     'empty body' => [''],
     'a string' => ['ok'],
-    'a number' => [42],
+    'a number' => ['42'],
 ]);
 
 it('treats a single object as a list of one message', function () {
