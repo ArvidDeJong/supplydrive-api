@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Darvis\SupplydriveApi\Exceptions\SupplydriveException;
 use Darvis\SupplydriveApi\Support\SupplydriveConfig;
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
@@ -146,6 +147,7 @@ class SupplydriveClient
      *
      * @throws \InvalidArgumentException when no filter is given or a filter is not one the API knows
      * @throws SupplydriveException when Supplydrive refuses the login or the call
+     * @throws ConnectionException when Supplydrive cannot be reached or does not answer in time
      */
     public function messageStatus(array $filters): array
     {
