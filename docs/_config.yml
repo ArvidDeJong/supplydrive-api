@@ -1,0 +1,42 @@
+title: Supplydrive API for Laravel
+description: "darvis/supplydrive-api is a Laravel client for the Supplydrive Portal API: it logs in, keeps the access token, and tells you what happened to an invoice or another message you sent through Supplydrive, a Dutch PEPPOL access point."
+url: https://arviddejong.github.io
+baseurl: /supplydrive-api
+
+remote_theme: just-the-docs/just-the-docs@v0.12.0
+plugins:
+  - jekyll-remote-theme
+  - jekyll-relative-links
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Facts about the package, used by the structured data and llms.txt.
+package:
+  name: darvis/supplydrive-api
+  repository: https://github.com/ArvidDeJong/supplydrive-api
+  packagist: https://packagist.org/packages/darvis/supplydrive-api
+  license_url: https://github.com/ArvidDeJong/supplydrive-api/blob/main/LICENSE
+  requires: "PHP 8.2+, Laravel 11, 12 or 13, and a Supplydrive portal account with the role for the status endpoint"
+  platforms: [Laravel, PHP]
+  keywords: [laravel, supplydrive, supplydrive api, peppol, peppol status, e-invoicing, invoice status, berichtstatus, api client]
+
+# Developer credit in the footer and the structured data.
+developer:
+  company: ARVID.NL
+  url: https://arvid.nl
+
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+
+aux_links:
+  GitHub: https://github.com/ArvidDeJong/supplydrive-api
+  Packagist: https://packagist.org/packages/darvis/supplydrive-api
+aux_links_new_tab: true
+
+gh_edit_link: true
+gh_edit_link_text: Edit this page on GitHub
+gh_edit_repository: https://github.com/ArvidDeJong/supplydrive-api
+gh_edit_branch: main
+gh_edit_source: docs
+gh_edit_view_mode: tree

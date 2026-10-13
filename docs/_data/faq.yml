@@ -1,0 +1,68 @@
+# Questions as people ask them to an assistant. Short, factual answers.
+# Rendered on faq.md, in the FAQPage structured data and in llms.txt.
+- q: What is darvis/supplydrive-api?
+  a: >-
+    A Laravel package with a client for the status endpoint of the Supplydrive Portal API.
+    Supplydrive is a Dutch PEPPOL access point and EDI provider; after you send an invoice through
+    them, this package tells you whether it was delivered, by your invoice number, by the message id
+    Supplydrive gave you, or per debtor. It does not send invoices.
+
+- q: How do I connect a Laravel application to the Supplydrive portal?
+  a: >-
+    Run `composer require darvis/supplydrive-api`, set `SUPPLYDRIVE_USERNAME` and
+    `SUPPLYDRIVE_PASSWORD` in `.env` and check with `php artisan supplydrive:status
+    --functional-id=<invoice number>`. Then resolve `Darvis\SupplydriveApi\SupplydriveClient` from the
+    container and call `byFunctionalId()`, `byMessageId()`, `byDebtorKvk()`, `byDebtorGln()`,
+    `byDebtorVat()` or `messageStatus()`.
+
+- q: What do I need to use darvis/supplydrive-api, and what does it cost?
+  a: >-
+    PHP 8.2 or higher, Laravel 11, 12 or 13, and a Supplydrive portal account with the role for the
+    status endpoint, which Supplydrive creates for you. The package itself is free and MIT licensed.
+
+- q: How does darvis/supplydrive-api log in, and where is the access token kept?
+  a: >-
+    It posts `grant_type=password`, the client id `SupplydrivePortal`, your username and your
+    password as a form to the token endpoint of the portal, and sends the token it gets in the
+    `Authorization` header. The token is kept in memory and, encrypted with the application key, in
+    Laravel's cache until sixty seconds before it expires; `SUPPLYDRIVE_TOKEN_CACHE=false` keeps it in
+    memory only.
+
+- q: Which statuses can a Supplydrive message have?
+  a: >-
+    Eight, in Dutch: `Ontvangen door supplydrive`, `In verwerking` and `Aflevering in retry` are
+    pending; `Afgeleverd`, `Handmatig afgeleverd` and `Afgeleverd bij tussenpartij` are delivered;
+    `Bericht kon niet afgeleverd worden` and `Mapping gefaald` are failed. The `MessageStatus` enum
+    has a case for each, and `Message` has `isDelivered()`, `isFailed()` and `isPending()`, so you
+    never compare the Dutch strings yourself. `description()` explains a status in English or Dutch.
+
+- q: What happens when a lookup fails, and how do I get the HTTP status?
+  a: >-
+    The client throws `Darvis\SupplydriveApi\Exceptions\SupplydriveException`, which extends
+    `RuntimeException`, with a message such as `Supplydrive API call failed. HTTP status: 403.
+    Response: ...`. `$e->status()` gives the HTTP status, and `0` when there was no response. A 404
+    is not a failure: it means no messages match and gives an empty list. A timeout is an
+    `Illuminate\Http\Client\ConnectionException` instead.
+
+- q: Does darvis/supplydrive-api retry a failed call?
+  a: >-
+    Only once, and only for a 401 on a token it already had: it logs in again and repeats the call.
+    A 401 on a fresh token, a 5xx and a timeout are not retried, so look statuses up from a scheduled
+    command or a queued job. A request gives up after 30 seconds, 10 to connect
+    (`SUPPLYDRIVE_TIMEOUT`, `SUPPLYDRIVE_CONNECT_TIMEOUT`).
+
+- q: Is darvis/supplydrive-api safe with my portal password?
+  a: >-
+    The account goes in the body of the token request and the token goes in a header, never in a
+    URL. The package replaces the password and the token with `[redacted]` in its exception messages,
+    log lines and command output, and it only stores the token in the cache encrypted, under a key
+    that does not contain the username. The rest of an error response can name customers and
+    invoices, so protect your logs.
+
+- q: How do I test code that uses darvis/supplydrive-api without calling Supplydrive?
+  a: >-
+    Use `Http::fake()` for `portal.supplydrive.com/realms/*` (return an `access_token`) and for
+    `portal.supplydrive.com/SD/*` (return a list of items with `id`, `functionalId`, `status` and
+    `interfaceId`), set `supplydrive.username` and `supplydrive.password` to any value and call
+    `Http::preventStrayRequests()`. Run the tests on the `array` cache store, so a cached token does
+    not travel from one test to the next.

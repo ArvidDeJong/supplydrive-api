@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/ArvidDeJong/supplydrive-api/security/advisories/new
+    about: Report a vulnerability privately, for example a way to leak the portal password or the access token.
+  - name: Documentation
+    url: https://arviddejong.github.io/supplydrive-api/
+    about: Installation, quick start, how it works, the API reference and testing.
