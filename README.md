@@ -18,6 +18,7 @@ It does one thing. It does not send invoices; for that see [darvis/ubl-peppol](h
 - **Failures with a status** - a `SupplydriveException` with the HTTP status in `$e->status()`; a 404 is simply an empty list
 - **Safe with your password** - never in a URL, and replaced by `[redacted]` in error messages, log lines and command output
 - **A connection test** - `php artisan supplydrive:status --functional-id=F260001`
+- **An MCP server** - `php artisan mcp:start supplydrive` gives Claude and other AI agents the `lookup-message-status` and `explain-statuses` tools, registered when `laravel/mcp` is installed
 - **Laravel Boost** - guideline and skill included, so an AI assistant in your app knows the API
 
 ## Requirements
@@ -25,6 +26,7 @@ It does one thing. It does not send invoices; for that see [darvis/ubl-peppol](h
 - PHP 8.2+
 - Laravel 11, 12 or 13
 - A Supplydrive portal account with the role for the status endpoint; ask Supplydrive for one
+- `laravel/mcp` 1.0 or higher for the MCP server (Laravel Boost installs it)
 
 ## Installation
 
@@ -78,6 +80,7 @@ The full documentation lives on the [documentation site](https://arviddejong.git
 - [How it works](https://arviddejong.github.io/supplydrive-api/concepts.html): the token, the repeat after a 401, the statuses, timeouts and where the password goes
 - [API reference](https://arviddejong.github.io/supplydrive-api/api-reference.html): every public method, the enum, the exception and the command
 - [Testing](https://arviddejong.github.io/supplydrive-api/testing.html): fake Supplydrive in your tests
+- [MCP server](https://arviddejong.github.io/supplydrive-api/mcp-server.html): the handle, the two tools and how to add it to your agent
 - [Troubleshooting](https://arviddejong.github.io/supplydrive-api/troubleshooting.html): every message with its cause and its fix
 - [FAQ](https://arviddejong.github.io/supplydrive-api/faq.html): short answers
 

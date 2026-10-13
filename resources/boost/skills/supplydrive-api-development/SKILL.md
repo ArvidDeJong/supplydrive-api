@@ -125,6 +125,10 @@ php artisan supplydrive:status --kvk=12345678
 
 Exit code 0 for an answer (also when nothing matches), 1 for a failure, 2 without a filter.
 
+### Let an AI agent look it up
+
+With `laravel/mcp` installed the package registers a local MCP server. Add `php artisan mcp:start supplydrive` to the agent (`.mcp.json` for Claude Code). The `lookup-message-status` tool takes `functional_id`, `message_id`, `debtor_kvk`, `debtor_gln` or `debtor_vat` and answers with every message, its status and `delivered`, `failed, somebody has to act` or `pending, ask again later`; `explain-statuses` lists the statuses. A refused call comes back as a tool error with the exception message. The server only reads.
+
 ### Test code that uses the client
 
 ```php

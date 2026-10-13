@@ -19,13 +19,14 @@ It is for a Laravel developer whose application sends invoices through Supplydri
 - **Failures you can act on**: a `SupplydriveException` with the HTTP status in `$e->status()`; a 404 is simply an empty list.
 - **The password stays out of sight**: never in a URL, and removed from error messages before they are thrown, logged or printed.
 - **A connection test**: `php artisan supplydrive:status`.
+- **An MCP server** for Claude and other AI agents, with `lookup-message-status` and `explain-statuses`, registered when `laravel/mcp` is installed.
 
 ## What it does not do
 
 - No sending. Sending an invoice through Supplydrive is a `POST` with basic authentication to another URL; [darvis/ubl-peppol](https://github.com/ArvidDeJong/ubl-peppol) does that.
 - No Eloquent models, no migrations and no database tables. You get `Message` objects back and store what you need yourself.
 - No polling, no scheduler and no queue jobs. When and how often you ask Supplydrive is up to your application.
-- No webhooks and no routes.
+- No webhooks and no routes. The MCP server only reads.
 - No retry for a 5xx or a timeout.
 - No facade.
 
@@ -57,6 +58,7 @@ php artisan supplydrive:status --functional-id=F260001
 - [How it works](concepts.md): the login, where the token is kept, the one repeat after a 401, the statuses, timeouts and where the password goes
 - [API reference](api-reference.md): every public method, the value object, the enum, the exception, the command and the container binding
 - [Testing](testing.md): fake Supplydrive in the tests of your application
+- [MCP server](mcp-server.md): let an AI agent look messages up through `php artisan mcp:start supplydrive`
 - [Troubleshooting](troubleshooting.md): every message the package gives, with its cause and its fix
 - [FAQ](faq.md): short answers to the questions people ask first
 

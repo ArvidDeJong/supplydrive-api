@@ -109,6 +109,10 @@ The password and the token are replaced by `[redacted]` in the body.
 
 Prints the messages as a table with the description in the locale of the application. Exit code `0` for an answer, also when nothing matches; `1` when the login or the call fails, with `✗ Request failed:` and the message; `2` without a filter.
 
+## MCP server
+
+`Darvis\SupplydriveApi\Mcp\SupplydriveServer`, registered as a local server under the handle of `supplydrive.mcp.handle` when `laravel/mcp` is installed and `supplydrive.mcp.enabled` is true. Tools: `lookup-message-status` (`functional_id`, `message_id`, `debtor_kvk`, `debtor_gln`, `debtor_vat`) and `explain-statuses`. See [MCP server](mcp-server.md).
+
 ## Translations
 
 Namespace `supplydrive-api`, file `status.php`, locales `en` and `nl`. Keys: the eight of `MessageStatus::key()` plus `unknown`. Publish with `--tag=supplydrive-api-lang`.
@@ -122,6 +126,8 @@ File `config/supplydrive.php`, publish tag `supplydrive-api-config`. Read it thr
 | `baseUrl()` | `base_url` | `SUPPLYDRIVE_BASE_URL` | `https://portal.supplydrive.com` |
 | `clientId()` | `client_id` | `SUPPLYDRIVE_CLIENT_ID` | `SupplydrivePortal` |
 | `connectTimeout()` | `connect_timeout` | `SUPPLYDRIVE_CONNECT_TIMEOUT` | `10` |
+| `mcpEnabled()` | `mcp.enabled` | `SUPPLYDRIVE_MCP_ENABLED` | `true` |
+| `mcpHandle()` | `mcp.handle` | `SUPPLYDRIVE_MCP_HANDLE` | `supplydrive` |
 | `password()` | `password` | `SUPPLYDRIVE_PASSWORD` | |
 | `timeout()` | `timeout` | `SUPPLYDRIVE_TIMEOUT` | `30` |
 | `tokenCacheEnabled()` | `token_cache.enabled` | `SUPPLYDRIVE_TOKEN_CACHE` | `true` |

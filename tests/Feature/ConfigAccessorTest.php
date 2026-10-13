@@ -51,7 +51,8 @@ test('the config file keeps every key of 1.0', function () {
     $config = require packageRoot('config/supplydrive.php');
 
     expect(array_keys($config))
-        ->toBe(['base_url', 'client_id', 'connect_timeout', 'password', 'timeout', 'token_cache', 'token_url', 'username'])
+        ->toBe(['base_url', 'client_id', 'connect_timeout', 'mcp', 'password', 'timeout', 'token_cache', 'token_url', 'username'])
+        ->and(array_keys($config['mcp']))->toBe(['enabled', 'handle'])
         ->and(array_keys($config['token_cache']))->toBe(['enabled', 'store']);
 });
 
@@ -94,6 +95,22 @@ test('the token cache is on by default, and reads a yes or a no from the environ
 
     config(['supplydrive' => []]);
     expect(SupplydriveConfig::tokenCacheEnabled())->toBeTrue();
+});
+
+test('the MCP server is on by default under the handle supplydrive', function () {
+    $config = require packageRoot('config/supplydrive.php');
+
+    expect($config['mcp'])->toBe(['enabled' => true, 'handle' => 'supplydrive'])
+        ->and(SupplydriveConfig::mcpEnabled())->toBeTrue()
+        ->and(SupplydriveConfig::mcpHandle())->toBe('supplydrive');
+
+    config(['supplydrive.mcp.enabled' => 'false', 'supplydrive.mcp.handle' => '']);
+    expect(SupplydriveConfig::mcpEnabled())->toBeFalse()
+        ->and(SupplydriveConfig::mcpHandle())->toBe('supplydrive');
+
+    config(['supplydrive.mcp.enabled' => '', 'supplydrive.mcp.handle' => 'peppol-status']);
+    expect(SupplydriveConfig::mcpEnabled())->toBeTrue()
+        ->and(SupplydriveConfig::mcpHandle())->toBe('peppol-status');
 });
 
 test('an empty cache store name is the default store', function () {

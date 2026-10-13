@@ -59,6 +59,14 @@
     that does not contain the username. The rest of an error response can name customers and
     invoices, so protect your logs.
 
+- q: Can Claude or another AI agent look up a Supplydrive status for me?
+  a: >-
+    Yes. With `laravel/mcp` installed (Laravel Boost brings it) the package registers a local MCP
+    server; start it with `php artisan mcp:start supplydrive` and add that command to your agent.
+    The `lookup-message-status` tool takes the invoice number, the message id or a debtor and
+    answers with every message, its status and whether that means delivered, failed or pending;
+    `explain-statuses` lists the statuses. The server only reads.
+
 - q: How do I test code that uses darvis/supplydrive-api without calling Supplydrive?
   a: >-
     Use `Http::fake()` for `portal.supplydrive.com/realms/*` (return an `access_token`) and for

@@ -4,6 +4,7 @@ namespace Darvis\SupplydriveApi\Tests;
 
 use Darvis\SupplydriveApi\SupplydriveApiServiceProvider;
 use Illuminate\Support\Facades\Http;
+use Laravel\Mcp\Server\McpServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -24,7 +25,9 @@ abstract class TestCase extends Orchestra
 
     protected function getPackageProviders($app): array
     {
+        // Load laravel/mcp like a host app with the MCP server would.
         return [
+            McpServiceProvider::class,
             SupplydriveApiServiceProvider::class,
         ];
     }

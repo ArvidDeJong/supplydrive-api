@@ -1,6 +1,6 @@
 {
     "name": "darvis/supplydrive-api",
-    "description": "Laravel client for the Supplydrive Portal API: fetch the delivery status of PEPPOL invoices and other messages sent through Supplydrive, by invoice number, message id or debtor.",
+    "description": "Laravel client for the Supplydrive Portal API: fetch the delivery status of PEPPOL invoices and other messages sent through Supplydrive, by invoice number, message id or debtor, from PHP, artisan and an MCP server.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://arviddejong.github.io/supplydrive-api/",
@@ -11,6 +11,8 @@
         "e-invoicing",
         "invoice-status",
         "api-client",
+        "mcp",
+        "laravel-mcp",
         "laravel-boost"
     ],
     "authors": [
@@ -37,10 +39,14 @@
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
+        "laravel/mcp": "^1.0",
         "laravel/pint": "^1.0",
         "orchestra/testbench": "^9.0|^10.0|^11.0",
         "pestphp/pest": "^3.0|^4.0",
         "pestphp/pest-plugin-laravel": "^3.0|^4.0"
+    },
+    "suggest": {
+        "laravel/mcp": "Required for the local MCP server that lets an AI agent look up message statuses (^1.0)."
     },
     "autoload": {
         "psr-4": {

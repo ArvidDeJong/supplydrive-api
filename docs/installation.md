@@ -45,6 +45,8 @@ That is all a normal installation needs. The other settings have defaults:
 | `SUPPLYDRIVE_CONNECT_TIMEOUT` | `10` | Seconds to wait for the connection. |
 | `SUPPLYDRIVE_TOKEN_CACHE` | `true` | Keep the token in the cache between requests. `false` keeps it in memory only. |
 | `SUPPLYDRIVE_TOKEN_CACHE_STORE` | the default store | A store from `config/cache.php`. |
+| `SUPPLYDRIVE_MCP_ENABLED` | `true` | Register the [MCP server](mcp-server.md) when `laravel/mcp` is installed. |
+| `SUPPLYDRIVE_MCP_HANDLE` | `supplydrive` | The handle for `php artisan mcp:start`. |
 
 After changing `.env` on a server with a cached config, run `php artisan config:cache` again.
 

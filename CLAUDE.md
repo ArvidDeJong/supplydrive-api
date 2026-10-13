@@ -10,6 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Service provider auto-registered via `extra.laravel.providers` in [composer.json](composer.json)
 - Config key: `supplydrive` (file `config/supplydrive.php`, publish tag `supplydrive-api-config`)
 - Container: `SupplydriveClient` (alias `supplydrive`), a singleton. There is no facade and there are no models.
+- MCP: [SupplydriveServer](src/Mcp/SupplydriveServer.php) with [LookupMessageStatus](src/Mcp/Tools/LookupMessageStatus.php) and [ExplainStatuses](src/Mcp/Tools/ExplainStatuses.php), registered as a local server under `supplydrive.mcp.handle`.
 - Translations: `supplydrive-api::status.*`, `resources/lang/en` and `nl`, publish tag `supplydrive-api-lang`.
 
 ## Architecture
@@ -20,6 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - The token lives on the instance until sixty seconds before `expires_in` (300 seconds when the response has none; Keycloak tokens are short), and in Laravel's cache for that same period, encrypted with `Crypt`, under `supplydrive.token.<sha256 of token URL|client id|username>`. `tokenCache()` is the one method that touches the cache: it does nothing when the cache is off, and turns any failure of the store or of the encryption into one warning and a client that works from memory. There is no lock: the token endpoint is cheap and a status lookup is rare.
 - `getAccessToken()` sets `$tokenIsFresh`: true when the token was fetched from the token endpoint during this call, false when it was held or came from the cache. `messageStatus()` repeats a call once after a 401 only when the token was not fresh.
 - [Message](src/Message.php) is a readonly value object; [MessageStatus](src/MessageStatus.php) a string backed enum whose values are the Dutch strings of the API. A status the API adds later stays a plain string on `Message::$status`; `knownStatus()` is null and `isPending()` true for it.
+- `laravel/mcp` is a dev dependency and a suggestion, not a requirement: it needs `illuminate/json-schema` 12.41 or higher, and a hard requirement would lock out Laravel 11 hosts. The provider registers the server only when the `Registrar` class exists. The MCP tool calls `SupplydriveClient::messageStatus()` and adds nothing but wording; keep every rule in the client, so the command, the tool and PHP stay in step. The tool returns a `SupplydriveException` as `Response::error()` with the same message, so an agent can correct itself; a `ConnectionException` too, prefixed. Don't catch other exceptions there.
 - [MessageStatusCommand](src/Console/Commands/MessageStatusCommand.php) resolves the client inside its `try`, so a failure prints `✗ Request failed:` instead of a stack trace. Exit codes: 0 for an answer (also when nothing matches), 1 for a failure, 2 without a filter.
 
 ## Conventions

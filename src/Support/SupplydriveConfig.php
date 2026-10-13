@@ -43,6 +43,30 @@ final class SupplydriveConfig
     }
 
     /**
+     * Whether the local MCP server is registered (only when laravel/mcp is installed).
+     */
+    public static function mcpEnabled(): bool
+    {
+        $enabled = config('supplydrive.mcp.enabled', true);
+
+        if ($enabled === null || $enabled === '') {
+            return true;
+        }
+
+        return filter_var($enabled, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true;
+    }
+
+    /**
+     * The handle for php artisan mcp:start. An empty value gives the default.
+     */
+    public static function mcpHandle(): string
+    {
+        $handle = config('supplydrive.mcp.handle', 'supplydrive');
+
+        return is_string($handle) && $handle !== '' ? $handle : 'supplydrive';
+    }
+
+    /**
      * The password of the portal account, or an empty string when it is not set.
      */
     public static function password(): string

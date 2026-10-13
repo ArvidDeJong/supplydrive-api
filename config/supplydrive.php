@@ -21,6 +21,13 @@ return [
     // Seconds to wait for the connection to Supplydrive. Not a positive number: 10.
     'connect_timeout' => env('SUPPLYDRIVE_CONNECT_TIMEOUT', 10),
 
+    // The local (stdio) MCP server, registered when laravel/mcp is installed. Start it with
+    // php artisan mcp:start <handle>.
+    'mcp' => [
+        'enabled' => env('SUPPLYDRIVE_MCP_ENABLED', true),
+        'handle' => env('SUPPLYDRIVE_MCP_HANDLE', 'supplydrive'),
+    ],
+
     // Password of the portal account Supplydrive created for you. Sent in the body of the token request.
     'password' => env('SUPPLYDRIVE_PASSWORD'),
 

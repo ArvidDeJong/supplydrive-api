@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `php artisan supplydrive:status` with `--functional-id`, `--message-id`, `--kvk`, `--gln` and
   `--vat`, which prints the messages as a table. Exit code 0 for an answer, 1 for a failure, 2
   without a filter.
+- A local MCP server (`Darvis\SupplydriveApi\Mcp\SupplydriveServer`, handle `supplydrive`,
+  `SUPPLYDRIVE_MCP_ENABLED`, `SUPPLYDRIVE_MCP_HANDLE`) with the read only tools
+  `lookup-message-status` and `explain-statuses`, registered when `laravel/mcp` is installed.
 - Config file `config/supplydrive.php` (`supplydrive-api-config` publish tag), read through
   `Darvis\SupplydriveApi\Support\SupplydriveConfig`.
 - Laravel Boost guideline and skill.
