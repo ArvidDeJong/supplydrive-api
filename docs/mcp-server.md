@@ -1,6 +1,6 @@
 ---
 title: "MCP server"
-nav_order: 7
+nav_order: 8
 description: "Let Claude or another AI agent look up what happened to an invoice at Supplydrive through the local MCP server of darvis/supplydrive-api: handle and tools."
 ---
 

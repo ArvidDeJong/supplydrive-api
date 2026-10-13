@@ -15,6 +15,12 @@ abstract class TestCase extends Orchestra
 
     public const ACCESS_TOKEN = 'test-access-token';
 
+    public const SEND_USERNAME = 'send-account';
+
+    public const SEND_PASSWORD = 'send-secret/with+chars==';
+
+    public const UBL = '<?xml version="1.0" encoding="UTF-8"?><Invoice><cbc:ID>F260001</cbc:ID></Invoice>';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -37,6 +43,8 @@ abstract class TestCase extends Orchestra
         // The package defaults have no account, and without one the client cannot log in.
         $app['config']->set('supplydrive.username', self::USERNAME);
         $app['config']->set('supplydrive.password', self::PASSWORD);
+        $app['config']->set('supplydrive.send.username', self::SEND_USERNAME);
+        $app['config']->set('supplydrive.send.password', self::SEND_PASSWORD);
 
         // The token cache encrypts with the application key and uses the default cache store.
         $app['config']->set('app.key', 'base64:'.base64_encode(str_repeat('a', 32)));
@@ -70,6 +78,16 @@ abstract class TestCase extends Orchestra
                 'expires_in' => $expiresIn,
             ]),
             'portal.supplydrive.com/SD/*' => is_callable($messages) ? $messages : Http::response($messages, $status),
+        ]);
+    }
+
+    /**
+     * Fake the send endpoint with the given body and status.
+     */
+    protected function fakeSendEndpoint(string|array $body = '4711', int $status = 200): void
+    {
+        Http::fake([
+            'rest.supplydrive.com/*' => Http::response($body, $status),
         ]);
     }
 

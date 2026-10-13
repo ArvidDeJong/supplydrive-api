@@ -2,10 +2,11 @@
 # Rendered on faq.md, in the FAQPage structured data and in llms.txt.
 - q: What is darvis/supplydrive-api?
   a: >-
-    A Laravel package with a client for the status endpoint of the Supplydrive Portal API.
-    Supplydrive is a Dutch PEPPOL access point and EDI provider; after you send an invoice through
-    them, this package tells you whether it was delivered, by your invoice number, by the message id
-    Supplydrive gave you, or per debtor. It does not send invoices.
+    A Laravel package with a client for the Supplydrive API. Supplydrive is a Dutch PEPPOL access
+    point and EDI provider; this package sends a UBL invoice to them and tells you whether it was
+    delivered, by your invoice number, by the message id Supplydrive gave you, or per debtor. It
+    does not build the UBL; darvis/ubl-peppol does that. It needs PHP 8.2+, Laravel 11, 12 or 13
+    and the accounts Supplydrive creates for you; the package itself is free and MIT licensed.
 
 - q: How do I connect a Laravel application to the Supplydrive portal?
   a: >-
@@ -14,11 +15,6 @@
     --functional-id=<invoice number>`. Then resolve `Darvis\SupplydriveApi\SupplydriveClient` from the
     container and call `byFunctionalId()`, `byMessageId()`, `byDebtorKvk()`, `byDebtorGln()`,
     `byDebtorVat()` or `messageStatus()`.
-
-- q: What do I need to use darvis/supplydrive-api, and what does it cost?
-  a: >-
-    PHP 8.2 or higher, Laravel 11, 12 or 13, and a Supplydrive portal account with the role for the
-    status endpoint, which Supplydrive creates for you. The package itself is free and MIT licensed.
 
 - q: How does darvis/supplydrive-api log in, and where is the access token kept?
   a: >-
@@ -74,3 +70,12 @@
     `interfaceId`), set `supplydrive.username` and `supplydrive.password` to any value and call
     `Http::preventStrayRequests()`. Run the tests on the `array` cache store, so a cached token does
     not travel from one test to the next.
+
+- q: How do I send an invoice to Supplydrive from Laravel?
+  a: >-
+    Set `SUPPLYDRIVE_SEND_USERNAME`, `SUPPLYDRIVE_SEND_PASSWORD` and, when yours differs from the
+    default, `SUPPLYDRIVE_SEND_URL` in `.env`; it is another account than the portal login. Then
+    call `send($ublXml, $invoiceNumber)` on `Darvis\SupplydriveApi\SupplydriveSender`. A 2xx gives
+    a `SendResult` with the message id Supplydrive answered with; store it, it is the key for the
+    status history. A refusal throws `SupplydriveException`, nothing is retried, and a timeout may
+    still mean the document arrived, so look it up before you send again.

@@ -1,5 +1,5 @@
 title: Supplydrive API for Laravel
-description: "darvis/supplydrive-api is a Laravel client for the Supplydrive Portal API: it logs in, keeps the access token, and tells you what happened to an invoice or another message you sent through Supplydrive, a Dutch PEPPOL access point."
+description: "darvis/supplydrive-api is a Laravel client for the Supplydrive API: it sends a UBL invoice to Supplydrive, a Dutch PEPPOL access point, and tells you what happened to it, by invoice number, message id or debtor."
 url: https://arviddejong.github.io
 baseurl: /supplydrive-api
 
@@ -16,9 +16,9 @@ package:
   repository: https://github.com/ArvidDeJong/supplydrive-api
   packagist: https://packagist.org/packages/darvis/supplydrive-api
   license_url: https://github.com/ArvidDeJong/supplydrive-api/blob/main/LICENSE
-  requires: "PHP 8.2+, Laravel 11, 12 or 13, and a Supplydrive portal account with the role for the status endpoint"
+  requires: "PHP 8.2+, Laravel 11, 12 or 13, a Supplydrive portal account with the role for the status endpoint, and the send account for sending"
   platforms: [Laravel, PHP]
-  keywords: [laravel, supplydrive, supplydrive api, peppol, peppol status, e-invoicing, invoice status, berichtstatus, api client]
+  keywords: [laravel, supplydrive, supplydrive api, peppol, peppol status, send peppol invoice, e-invoicing, invoice status, berichtstatus, api client]
 
 # Developer credit in the footer and the structured data.
 developer:

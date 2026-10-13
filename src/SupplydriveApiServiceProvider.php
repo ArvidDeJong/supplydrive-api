@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Darvis\SupplydriveApi;
 
 use Darvis\SupplydriveApi\Console\Commands\MessageStatusCommand;
+use Darvis\SupplydriveApi\Console\Commands\SendDocumentCommand;
 use Darvis\SupplydriveApi\Mcp\SupplydriveServer;
 use Darvis\SupplydriveApi\Support\SupplydriveConfig;
 use Illuminate\Support\ServiceProvider;
@@ -21,6 +22,9 @@ class SupplydriveApiServiceProvider extends ServiceProvider
 
         $this->app->singleton(SupplydriveClient::class);
         $this->app->alias(SupplydriveClient::class, 'supplydrive');
+
+        $this->app->singleton(SupplydriveSender::class);
+        $this->app->alias(SupplydriveSender::class, 'supplydrive.sender');
     }
 
     /**
@@ -41,6 +45,7 @@ class SupplydriveApiServiceProvider extends ServiceProvider
 
             $this->commands([
                 MessageStatusCommand::class,
+                SendDocumentCommand::class,
             ]);
         }
 

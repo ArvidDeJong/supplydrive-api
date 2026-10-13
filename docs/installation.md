@@ -1,7 +1,7 @@
 ---
 title: "Installation"
 nav_order: 2
-description: "Install darvis/supplydrive-api in Laravel: the package, the portal account in .env, the optional config file and translations, and how to check that it works."
+description: "Install darvis/supplydrive-api in Laravel: the package, the portal and send accounts in .env, the optional config file and translations, and how to check it."
 ---
 
 # Installation
@@ -11,6 +11,7 @@ description: "Install darvis/supplydrive-api in Laravel: the package, the portal
 - PHP 8.2+
 - Laravel 11, 12 or 13
 - A Supplydrive portal account with the role for the status endpoint
+- For sending: the send URL and the send account Supplydrive gave you
 - An `APP_KEY` and a cache store that persists, if you want the access token to be cached (a new Laravel application has both)
 
 ## 1. Install the package
@@ -25,13 +26,21 @@ Laravel registers the service provider by itself (package discovery). There is n
 
 The package logs in to the Supplydrive portal with a username and a password. Supplydrive creates that account for you; ask your contact there for "an account for the message status API". The account needs the role for the status endpoint, or every call answers with a 401.
 
-The credentials you use to *send* invoices (the basic authentication of the messages URL) are a different account. They do not work here.
+The credentials you use to *send* invoices (the basic authentication of the messages URL) are a different account. They do not work here; they go in the `SUPPLYDRIVE_SEND_*` variables below.
 
 ## 3. Add the account to `.env`
 
 ```env
 SUPPLYDRIVE_USERNAME=your-username
 SUPPLYDRIVE_PASSWORD=your-password
+```
+
+To send documents, add the send account as well. Supplydrive gives you the URL (it differs per environment) and the account:
+
+```env
+SUPPLYDRIVE_SEND_URL=https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE
+SUPPLYDRIVE_SEND_USERNAME=your-send-username
+SUPPLYDRIVE_SEND_PASSWORD=your-send-password
 ```
 
 That is all a normal installation needs. The other settings have defaults:
@@ -47,6 +56,9 @@ That is all a normal installation needs. The other settings have defaults:
 | `SUPPLYDRIVE_TOKEN_CACHE_STORE` | the default store | A store from `config/cache.php`. |
 | `SUPPLYDRIVE_MCP_ENABLED` | `true` | Register the [MCP server](mcp-server.md) when `laravel/mcp` is installed. |
 | `SUPPLYDRIVE_MCP_HANDLE` | `supplydrive` | The handle for `php artisan mcp:start`. |
+| `SUPPLYDRIVE_SEND_URL` | `https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE` | The send endpoint. Set it when Supplydrive gave you another one. |
+| `SUPPLYDRIVE_SEND_USERNAME` | | The send account. |
+| `SUPPLYDRIVE_SEND_PASSWORD` | | The password of the send account. |
 
 After changing `.env` on a server with a cached config, run `php artisan config:cache` again.
 
@@ -111,5 +123,7 @@ The portal did not accept the username and password.
 ```
 
 The login worked, but the account may not read these messages or lacks the role for the endpoint. Ask Supplydrive.
+
+To check the send account, send a document you want delivered: `php artisan supplydrive:send path/to/invoice.xml`. It sends for real; see [Sending](sending.md).
 
 The [troubleshooting page](troubleshooting.md) has every message with its cause and fix.

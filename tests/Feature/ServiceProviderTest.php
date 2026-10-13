@@ -1,8 +1,10 @@
 <?php
 
 use Darvis\SupplydriveApi\Console\Commands\MessageStatusCommand;
+use Darvis\SupplydriveApi\Console\Commands\SendDocumentCommand;
 use Darvis\SupplydriveApi\SupplydriveApiServiceProvider;
 use Darvis\SupplydriveApi\SupplydriveClient;
+use Darvis\SupplydriveApi\SupplydriveSender;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,6 +35,20 @@ it('does not build the client until it is used', function () {
 it('registers the supplydrive:status command', function () {
     expect(app(Kernel::class)->all())->toHaveKey('supplydrive:status')
         ->and(app(Kernel::class)->all()['supplydrive:status'])->toBeInstanceOf(MessageStatusCommand::class);
+});
+
+it('registers the sender as a singleton with the supplydrive.sender alias, without a send account', function () {
+    config(['supplydrive.send.username' => null, 'supplydrive.send.password' => null]);
+
+    app()->forgetInstance(SupplydriveSender::class);
+
+    expect(app(SupplydriveSender::class))->toBe(app(SupplydriveSender::class))
+        ->and(app('supplydrive.sender'))->toBe(app(SupplydriveSender::class));
+});
+
+it('registers the supplydrive:send command', function () {
+    expect(app(Kernel::class)->all())->toHaveKey('supplydrive:send')
+        ->and(app(Kernel::class)->all()['supplydrive:send'])->toBeInstanceOf(SendDocumentCommand::class);
 });
 
 it('loads the status descriptions in English and Dutch', function () {

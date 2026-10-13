@@ -1,12 +1,12 @@
 ---
 title: "Troubleshooting"
-nav_order: 8
+nav_order: 9
 description: "Every error message and log line of darvis/supplydrive-api, quoted literally, with cause and fix: a missing account, a refused login, 401, timeouts, the cache."
 ---
 
 # Troubleshooting
 
-Start with `php artisan supplydrive:status --functional-id=<an invoice number>`. It makes one lookup with your account and prints the same message your code would get.
+Start with `php artisan supplydrive:status --functional-id=<an invoice number>`. It makes one lookup with your account and prints the same message your code would get. For a send, `php artisan supplydrive:send <file>` does the same, for real.
 
 In code, read the HTTP status from the exception with `$e->status()` instead of taking it out of the message. `0` means there was no response at all.
 
@@ -23,6 +23,36 @@ Also with `400` or another status. Keycloak answers `401` with `invalid_grant` f
 **Cause.** The token endpoint did not accept the account. `[redacted]` in the message is where the server echoed your password.
 
 **Fix.** Compare `SUPPLYDRIVE_USERNAME` and `SUPPLYDRIVE_PASSWORD` with what Supplydrive gave you, and check `SUPPLYDRIVE_TOKEN_URL` and `SUPPLYDRIVE_CLIENT_ID` if you changed them. The account for sending invoices (basic authentication on the messages URL) is a different account and does not work here. This request is never repeated.
+
+## Supplydrive send config is incomplete (send.username, send.password).
+
+**Cause.** `SUPPLYDRIVE_SEND_USERNAME` or `SUPPLYDRIVE_SEND_PASSWORD` is empty. The sender is built without checking, so this appears on the first `send()`, with status `0`, and nothing is sent.
+
+**Fix.** Add the send account Supplydrive gave you to `.env`, then clear or rebuild the config cache. The portal account (`SUPPLYDRIVE_USERNAME`) is another account and does not work here.
+
+## Supplydrive send failed. HTTP status: 401
+
+**Cause.** The send endpoint did not accept the basic authentication. The request is never repeated.
+
+**Fix.** Compare `SUPPLYDRIVE_SEND_USERNAME` and `SUPPLYDRIVE_SEND_PASSWORD` with what Supplydrive gave you, and check `SUPPLYDRIVE_SEND_URL`: the `LIVE` and `TEST` endpoints have their own accounts.
+
+## Supplydrive send failed. HTTP status: 400, 415 or 422
+
+**Cause.** Supplydrive refused the document. The message has the response body, which usually names the rule or the element.
+
+**Fix.** Validate the document before sending (darvis/ubl-peppol has `validate()`), and compare the body with the PEPPOL rule it names. A 415 means the request was not sent as `application/xml`; the package always does, so look for a proxy in between.
+
+## Supplydrive send failed. HTTP status: 500
+
+**Cause.** Supplydrive is down or broke on the document. Nothing is retried, because the document may have been received before the error.
+
+**Fix.** Look the invoice number up with `php artisan supplydrive:status --functional-id=<number>` before you send again. When nothing matches, send again later from the queue.
+
+## The send result has no message id
+
+**Cause.** The document was accepted (a 2xx), but the package did not find a message id in the body. Supplydrive does not document the shape of the response, and the package reads the likely shapes.
+
+**Fix.** Nothing is lost: the invoice was sent, and the lookup by invoice number still works. Run `php artisan supplydrive:send` once to see the body as it came, and open an issue with that body (without customer data), so the next version reads it.
 
 ## Supplydrive token response does not contain access_token.
 

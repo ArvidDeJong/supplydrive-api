@@ -6,6 +6,7 @@ namespace Darvis\SupplydriveApi;
 
 use Carbon\Carbon;
 use Darvis\SupplydriveApi\Exceptions\SupplydriveException;
+use Darvis\SupplydriveApi\Support\RedactsSecrets;
 use Darvis\SupplydriveApi\Support\SupplydriveConfig;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Client\ConnectionException;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\Log;
  */
 class SupplydriveClient
 {
+    use RedactsSecrets;
+
     /**
      * The path of the status endpoint below the base URL.
      */
@@ -456,20 +459,6 @@ class SupplydriveClient
      */
     protected function redactSecrets(string $message): string
     {
-        $search = [];
-
-        foreach ([$this->password, $this->accessToken] as $secret) {
-            if (! is_string($secret) || $secret === '') {
-                continue;
-            }
-
-            // As it is, as it looks inside a JSON string, and as it looks in a form body or a URL.
-            $search[] = $secret;
-            $search[] = trim((string) json_encode($secret), '"');
-            $search[] = urlencode($secret);
-            $search[] = rawurlencode($secret);
-        }
-
-        return str_replace(array_unique($search), '[redacted]', $message);
+        return $this->redact($message, [$this->password, $this->accessToken]);
     }
 }

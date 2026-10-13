@@ -4,7 +4,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Supplydrive Portal API
+    | Supplydrive API
     |--------------------------------------------------------------------------
     |
     | Read these values through Darvis\SupplydriveApi\Support\SupplydriveConfig.
@@ -13,6 +13,7 @@ return [
     */
 
     // Base URL of the portal. The status endpoint is /SD/Berichten/Status below it.
+    // The portal account (username, password) is for the status lookups only.
     'base_url' => env('SUPPLYDRIVE_BASE_URL', 'https://portal.supplydrive.com'),
 
     // OAuth client id of the portal. A fixed value Supplydrive documents; you normally keep it.
@@ -30,6 +31,15 @@ return [
 
     // Password of the portal account Supplydrive created for you. Sent in the body of the token request.
     'password' => env('SUPPLYDRIVE_PASSWORD'),
+
+    // The send endpoint (REST, basic auth), where a UBL document is posted. This is a DIFFERENT
+    // account than the portal login above: Supplydrive hands out the URL and the account per
+    // customer, and the URL can differ per environment (LIVE, TEST).
+    'send' => [
+        'password' => env('SUPPLYDRIVE_SEND_PASSWORD'),
+        'url' => env('SUPPLYDRIVE_SEND_URL', 'https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE'),
+        'username' => env('SUPPLYDRIVE_SEND_USERNAME'),
+    ],
 
     // Seconds to wait for a whole request, the token request included. Not a positive number: 30.
     'timeout' => env('SUPPLYDRIVE_TIMEOUT', 30),

@@ -47,12 +47,13 @@ test('an empty client id is the default client id', function () {
     expect(SupplydriveConfig::clientId())->toBe('OtherPortal');
 });
 
-test('the config file keeps every key of 1.0', function () {
+test('the config file keeps every key of 1.0 and the send block of 1.2', function () {
     $config = require packageRoot('config/supplydrive.php');
 
     expect(array_keys($config))
-        ->toBe(['base_url', 'client_id', 'connect_timeout', 'mcp', 'password', 'timeout', 'token_cache', 'token_url', 'username'])
+        ->toBe(['base_url', 'client_id', 'connect_timeout', 'mcp', 'password', 'send', 'timeout', 'token_cache', 'token_url', 'username'])
         ->and(array_keys($config['mcp']))->toBe(['enabled', 'handle'])
+        ->and(array_keys($config['send']))->toBe(['password', 'url', 'username'])
         ->and(array_keys($config['token_cache']))->toBe(['enabled', 'store']);
 });
 
@@ -188,4 +189,23 @@ test('every status has a line in every language file, in alphabetical order', fu
 
     expect(array_keys($en))->toBe($expected)
         ->and(array_keys($nl))->toBe($expected);
+});
+
+test('the send endpoint defaults to the LIVE URL, and an empty URL is the default', function () {
+    $config = require packageRoot('config/supplydrive.php');
+
+    expect($config['send'])->toBe(['password' => null, 'url' => 'https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE', 'username' => null]);
+
+    config(['supplydrive' => []]);
+    expect(SupplydriveConfig::sendUrl())->toBe('https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE')
+        ->and(SupplydriveConfig::sendUsername())->toBe('')
+        ->and(SupplydriveConfig::sendPassword())->toBe('');
+
+    config(['supplydrive.send' => ['url' => '', 'username' => 'acc', 'password' => 'pw']]);
+    expect(SupplydriveConfig::sendUrl())->toBe('https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE')
+        ->and(SupplydriveConfig::sendUsername())->toBe('acc')
+        ->and(SupplydriveConfig::sendPassword())->toBe('pw');
+
+    config(['supplydrive.send.url' => 'https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/TEST']);
+    expect(SupplydriveConfig::sendUrl())->toBe('https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/TEST');
 });

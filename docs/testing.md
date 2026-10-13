@@ -1,7 +1,7 @@
 ---
 title: "Testing"
-nav_order: 6
-description: "Test code that uses darvis/supplydrive-api without calling Supplydrive: fake the token and status endpoints with Http::fake(), and assert on what was sent."
+nav_order: 7
+description: "Test code that uses darvis/supplydrive-api without calling Supplydrive: fake the token, status and send endpoints with Http::fake() and assert what was sent."
 ---
 
 # Testing
@@ -37,6 +37,18 @@ config(['supplydrive.username' => 'test', 'supplydrive.password' => 'secret']);
 ```
 
 Keep the test cache on the `array` store (the default of a Laravel test run), or a token cached by one test is reused by the next.
+
+## The send endpoint
+
+```php
+Http::fake([
+    'rest.supplydrive.com/*' => Http::response(['berichtId' => 4711]),
+]);
+
+config(['supplydrive.send.username' => 'test', 'supplydrive.send.password' => 'secret']);
+```
+
+Fake a 401 to see your code handle a refused account, a 422 for a refused document, and a body without an id (`Http::response('<Ack/>')`) to see that your code stores nothing but still marks the invoice as sent. For a timeout, throw from the fake: `Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException('timed out'))`. Assert that exactly one request was sent (`Http::assertSentCount(1)`); a send that is repeated delivers the invoice twice.
 
 ## A complete test
 

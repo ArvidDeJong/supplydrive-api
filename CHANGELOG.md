@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-13
+
+### Added
+- `Darvis\SupplydriveApi\SupplydriveSender` (singleton, alias `supplydrive.sender`): `send(string $ublXml, ?string $functionalId = null)`
+  posts a UBL document to the send endpoint of Supplydrive with basic authentication. A 2xx gives a
+  `Darvis\SupplydriveApi\SendResult` with `httpStatus`, `messageId` (the id Supplydrive answered with,
+  read from a JSON object, a bare number or a numeric body; null when the body holds none), `body`
+  and `data`. A 4xx or 5xx throws `SupplydriveException` (`Supplydrive send failed. HTTP status: …`);
+  a missing send account throws `Supplydrive send config is incomplete (send.username, send.password).`
+  with status 0. Nothing is retried: a document sent twice is delivered twice.
+- Config block `send` with `password`, `url` and `username` (`SUPPLYDRIVE_SEND_PASSWORD`,
+  `SUPPLYDRIVE_SEND_URL`, `SUPPLYDRIVE_SEND_USERNAME`), read through `SupplydriveConfig::sendPassword()`,
+  `sendUrl()` and `sendUsername()`. The URL defaults to the LIVE endpoint. The send account is another
+  account than the portal login. Republish the config file if you published it.
+- `php artisan supplydrive:send {file} {--functional-id=}`, which sends the document for real and prints
+  the status, the message id and the response body as it came. Exit code 0, 1 on a refusal or a
+  connection error, 2 when the file cannot be read.
+- `Darvis\SupplydriveApi\Support\RedactsSecrets`, the trait both the client and the sender use to
+  replace secrets in a message.
+
+### Changed
+- The package description and the docs: the package now sends as well as looks up.
+
 ## [1.1.0] - 2026-10-13
 
 ### Added

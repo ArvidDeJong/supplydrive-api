@@ -1,13 +1,13 @@
 ---
 name: supplydrive-api-development
-description: Work with darvis/supplydrive-api. Use it to look up what happened to an invoice or another message sent through Supplydrive (a Dutch PEPPOL access point) from a Laravel app, by invoice number, message id or debtor, to act on a status (delivered, failed, pending), to handle a refused call, a 401, a timeout or a cached token, and to test code that talks to Supplydrive without calling it.
+description: Work with darvis/supplydrive-api. Use it to send a UBL invoice to Supplydrive (a Dutch PEPPOL access point) from a Laravel app and keep the message id, to look up what happened to it by invoice number, message id or debtor, to act on a status (delivered, failed, pending), to handle a refused send or call, a 401, a timeout or a cached token, and to test code that talks to Supplydrive without calling it.
 ---
 
 # darvis/supplydrive-api development
 
 ## When to use this skill
 
-Use this skill when code asks Supplydrive for the status of a message in an application that has `darvis/supplydrive-api` installed, when a lookup throws or `php artisan supplydrive:status` fails, when you have to decide what to do with a status, or when you write tests around such code.
+Use this skill when code sends a document to Supplydrive or asks Supplydrive for the status of a message in an application that has `darvis/supplydrive-api` installed, when a send or a lookup throws, when `php artisan supplydrive:status` or `supplydrive:send` fails, when you have to decide what to do with a status, or when you write tests around such code.
 
 ## How a call runs
 
@@ -35,6 +35,25 @@ Use this skill when code asks Supplydrive for the status of a message in an appl
 | Cache store down, unknown store, no `APP_KEY` | one `Log::warning()` (`Supplydrive token cache is not available, ...`), the token stays in memory, calls work | |
 | Cached value that cannot be decrypted | treated as no token: removed, a new login, nothing throws | |
 
+## How a send runs
+
+1. `Darvis\SupplydriveApi\SupplydriveSender` is a singleton. It reads the config once and does not throw without a send account; the first `send()` does, with status `0`, before anything is sent.
+2. `send($ublXml, $functionalId)` refuses an empty document with `InvalidArgumentException`, then does one `POST` to `SUPPLYDRIVE_SEND_URL` with basic auth (`SUPPLYDRIVE_SEND_USERNAME`, `SUPPLYDRIVE_SEND_PASSWORD`), `Content-Type: application/xml`, `Accept: application/json` and the document as the body. `$functionalId` only goes into the package's two log lines.
+3. A 2xx gives a `SendResult`: `httpStatus`, `messageId`, `body` (as it came), `data` (decoded when JSON), `hasMessageId()`. The id is read from a JSON object (`berichtId`, `messageId`, `id`, top level or one level down), a bare number or a numeric body. Supplydrive does not document the shape; an unknown shape gives `messageId` null and the raw `body`.
+4. A 4xx or 5xx throws `SupplydriveException` (`Supplydrive send failed. HTTP status: 422. Response: ...`, password redacted). **Nothing is retried**, not even a 401: a POST is not idempotent and a document sent twice is delivered twice.
+5. A timeout is a `ConnectionException`. Supplydrive may have received the document before the connection dropped: look the invoice number up with `byFunctionalId()` before anyone sends it again.
+
+| Situation | Result | `$e->status()` |
+| --- | --- | --- |
+| 2xx with a message id in the body | `SendResult`, `messageId` set | |
+| 2xx without a recognisable id | `SendResult`, `messageId` null, `body` has the answer | |
+| 401 | `SupplydriveException`: the send account | `401` |
+| 400, 415, 422 | `SupplydriveException`: the document, the body names the rule | that status |
+| 5xx | `SupplydriveException`; the document may have been received | that status |
+| No send account | `SupplydriveException`: `Supplydrive send config is incomplete (send.username, send.password).` | `0` |
+| Empty document | `InvalidArgumentException`, nothing is sent | |
+| Timeout, DNS, refused connection | `ConnectionException`; the document may have arrived | none |
+
 ## The statuses
 
 `Message::$status` is the Dutch string the API returns. `knownStatus()` maps it to `Darvis\SupplydriveApi\MessageStatus`:
@@ -54,6 +73,21 @@ Use this skill when code asks Supplydrive for the status of a message in an appl
 `description()` on both gives the translated explanation (`supplydrive-api::status.<key>`, `en` and `nl`). Compare with the enum, never with the Dutch strings in your own code.
 
 ## Scenarios
+
+### Send an invoice and keep the message id
+
+```php
+use Darvis\SupplydriveApi\SupplydriveSender;
+
+$result = app(SupplydriveSender::class)->send($ublXml, $invoice->invoice_nr);
+
+$invoice->update([
+    'peppol_sent_at' => now(),
+    'peppol_message_id' => $result->messageId, // null when the body holds none; still sent
+]);
+```
+
+Do this from a queued job with `$tries = 1`, and let the job check `peppol_sent_at` first. On a `ConnectionException`, look the invoice number up before the job or a person sends again; on a `SupplydriveException`, log the message and stop, the same document will be refused again.
 
 ### Did an invoice arrive?
 
@@ -118,6 +152,7 @@ try {
 ### From the terminal
 
 ```bash
+php artisan supplydrive:send storage/app/peppol/F260001.xml --functional-id=F260001   # sends for real, prints the raw response
 php artisan supplydrive:status --functional-id=F260001
 php artisan supplydrive:status --message-id=1234
 php artisan supplydrive:status --kvk=12345678
@@ -140,14 +175,23 @@ Http::fake([
     'portal.supplydrive.com/SD/*' => Http::response([
         ['id' => 1, 'functionalId' => 'F260001', 'status' => 'Afgeleverd', 'interfaceId' => 1000],
     ]),
+    'rest.supplydrive.com/*' => Http::response(['berichtId' => 4711]),
 ]);
-config(['supplydrive.username' => 'user', 'supplydrive.password' => 'secret']);
+config([
+    'supplydrive.username' => 'user', 'supplydrive.password' => 'secret',
+    'supplydrive.send.username' => 'send', 'supplydrive.send.password' => 'secret',
+]);
 ```
+
+Around a send, assert `Http::assertSentCount(1)`: a repeated send is a double invoice. Fake `Http::response('<Ack/>')` to see your code cope with a result without a message id.
 
 Fake a 404 for "no messages", a 401 for a refused account. Keep the cache on the `array` store in tests, or a token from one test is reused in the next.
 
 ## Don'ts
 
+- Don't retry a send, and don't give the job that sends more than one try. Check `byFunctionalId()` after a timeout instead.
+- Don't send from a web request, and don't send a document `validate()` of darvis/ubl-peppol rejects.
+- Don't reuse the portal account for the send endpoint or the other way round; they are different accounts.
 - Don't compare `$message->status` with Dutch strings; use `knownStatus()`, `isDelivered()`, `isFailed()` and `isPending()`.
 - Don't poll from a web request; a status lookup belongs in a scheduled command or a queued job.
 - Don't retry a 401 or a 5xx yourself in a loop.

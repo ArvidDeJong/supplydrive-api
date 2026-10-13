@@ -1,6 +1,6 @@
 ---
 title: "How it works"
-nav_order: 4
+nav_order: 5
 description: "How darvis/supplydrive-api logs in, where the token is kept, the one repeat after a 401, what a 404 means, the statuses, timeouts and where the password goes."
 ---
 

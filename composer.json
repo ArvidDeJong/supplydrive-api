@@ -1,6 +1,6 @@
 {
     "name": "darvis/supplydrive-api",
-    "description": "Laravel client for the Supplydrive Portal API: fetch the delivery status of PEPPOL invoices and other messages sent through Supplydrive, by invoice number, message id or debtor, from PHP, artisan and an MCP server.",
+    "description": "Laravel client for the Supplydrive API: send UBL invoices to Supplydrive, a Dutch PEPPOL access point, and fetch their delivery status by invoice number, message id or debtor, from PHP, artisan and an MCP server.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://arviddejong.github.io/supplydrive-api/",

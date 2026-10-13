@@ -16,6 +16,8 @@ final class SupplydriveConfig
 
     public const DEFAULT_TOKEN_URL = 'https://portal.supplydrive.com/realms/Supplydrive/protocol/openid-connect/token';
 
+    public const DEFAULT_SEND_URL = 'https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE';
+
     /**
      * Base URL of the portal, without a trailing slash.
      */
@@ -72,6 +74,32 @@ final class SupplydriveConfig
     public static function password(): string
     {
         return (string) config('supplydrive.password');
+    }
+
+    /**
+     * The password of the account for the send endpoint, or an empty string when it is not set.
+     */
+    public static function sendPassword(): string
+    {
+        return (string) config('supplydrive.send.password');
+    }
+
+    /**
+     * URL of the send endpoint. An empty value gives the default.
+     */
+    public static function sendUrl(): string
+    {
+        $url = config('supplydrive.send.url', self::DEFAULT_SEND_URL);
+
+        return is_string($url) && $url !== '' ? $url : self::DEFAULT_SEND_URL;
+    }
+
+    /**
+     * The username of the account for the send endpoint, or an empty string when it is not set.
+     */
+    public static function sendUsername(): string
+    {
+        return (string) config('supplydrive.send.username');
     }
 
     /**

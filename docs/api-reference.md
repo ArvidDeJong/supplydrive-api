@@ -1,6 +1,6 @@
 ---
 title: "API reference"
-nav_order: 5
+nav_order: 6
 description: "Every public method of darvis/supplydrive-api: the client and its lookups, the Message object, the MessageStatus enum, the exception, the command, the config."
 ---
 
@@ -39,6 +39,18 @@ Drops the access token in memory and in the cache. The next call logs in again.
 
 - `SupplydriveClient::STATUS_PATH`: `/SD/Berichten/Status`.
 - `SupplydriveClient::FILTERS`: `['functioneelId', 'berichtId', 'debiteurKVK', 'debiteurGLN', 'debiteurBTW']`.
+
+## `Darvis\SupplydriveApi\SupplydriveSender`
+
+Resolve it from the container (singleton, alias `supplydrive.sender`). It can be built without a send account; the first `send()` then throws.
+
+### `send(string $ublXml, ?string $functionalId = null): SendResult`
+
+`POST` of the document to the send URL with basic authentication, `Content-Type: application/xml` and `Accept: application/json`. A 2xx gives a `SendResult`. Any 4xx or 5xx throws a `SupplydriveException` with the status; nothing is retried. A timeout is a `ConnectionException`. An empty document throws `InvalidArgumentException` before anything is sent. `$functionalId` only appears in the log lines of the package.
+
+## `Darvis\SupplydriveApi\SendResult`
+
+Readonly. `httpStatus` (int), `messageId` (?string), `body` (string, the response as sent), `data` (?array, the body decoded when it is JSON), `hasMessageId(): bool`. `SendResult::fromResponse(int $httpStatus, string $body)` builds one, `SendResult::extractMessageId(mixed $value): ?string` reads the id from a decoded body, a number or an array; the keys it looks at are in `SendResult::MESSAGE_ID_KEYS`.
 
 ## `Darvis\SupplydriveApi\Message`
 
@@ -94,8 +106,10 @@ Extends `RuntimeException`. `status(): int` is the HTTP status of the response t
 - `Failed to retrieve access_token from Supplydrive. HTTP status: <status>. Response: <body>`
 - `Supplydrive token response does not contain access_token.` (the status of that response)
 - `Supplydrive API call failed. HTTP status: <status>. Response: <body>`
+- `Supplydrive send config is incomplete (send.username, send.password).` (status 0)
+- `Supplydrive send failed. HTTP status: <status>. Response: <body>`
 
-The password and the token are replaced by `[redacted]` in the body.
+The passwords and the token are replaced by `[redacted]` in the body.
 
 ## `php artisan supplydrive:status`
 
@@ -108,6 +122,10 @@ The password and the token are replaced by `[redacted]` in the body.
 | `--vat=` | `debiteurBTW` |
 
 Prints the messages as a table with the description in the locale of the application. Exit code `0` for an answer, also when nothing matches; `1` when the login or the call fails, with `✗ Request failed:` and the message; `2` without a filter.
+
+## `php artisan supplydrive:send`
+
+`supplydrive:send {file} {--functional-id=}` reads the UBL document from the file and sends it. Prints the HTTP status, the message id (or that none was found) and the response body as it came. Exit code `0` when the document was accepted, `1` when Supplydrive refused it or could not be reached, `2` when the file does not exist or cannot be read.
 
 ## MCP server
 
@@ -129,6 +147,9 @@ File `config/supplydrive.php`, publish tag `supplydrive-api-config`. Read it thr
 | `mcpEnabled()` | `mcp.enabled` | `SUPPLYDRIVE_MCP_ENABLED` | `true` |
 | `mcpHandle()` | `mcp.handle` | `SUPPLYDRIVE_MCP_HANDLE` | `supplydrive` |
 | `password()` | `password` | `SUPPLYDRIVE_PASSWORD` | |
+| `sendPassword()` | `send.password` | `SUPPLYDRIVE_SEND_PASSWORD` | |
+| `sendUrl()` | `send.url` | `SUPPLYDRIVE_SEND_URL` | `https://rest.supplydrive.com/PEPPOL-SD-MESSAGES-HTTP/LIVE` |
+| `sendUsername()` | `send.username` | `SUPPLYDRIVE_SEND_USERNAME` | |
 | `timeout()` | `timeout` | `SUPPLYDRIVE_TIMEOUT` | `30` |
 | `tokenCacheEnabled()` | `token_cache.enabled` | `SUPPLYDRIVE_TOKEN_CACHE` | `true` |
 | `tokenCacheStore()` | `token_cache.store` | `SUPPLYDRIVE_TOKEN_CACHE_STORE` | the default store |
@@ -138,4 +159,5 @@ File `config/supplydrive.php`, publish tag `supplydrive-api-config`. Read it thr
 ## Container
 
 - `Darvis\SupplydriveApi\SupplydriveClient`, singleton, alias `supplydrive`.
+- `Darvis\SupplydriveApi\SupplydriveSender`, singleton, alias `supplydrive.sender`.
 - No facade, no models, no routes.

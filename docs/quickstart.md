@@ -24,6 +24,20 @@ foreach ($messages as $message) {
 
 `byFunctionalId()` looks up by the reference you gave the message, which for an invoice is the invoice number. The result is a list of `Darvis\SupplydriveApi\Message`: empty when Supplydrive has never seen that number, and more than one when you sent the same number more than once.
 
+## Send first
+
+The invoice has to reach Supplydrive before there is a status. Send it with the sender and keep the message id, the exact key for its history:
+
+```php
+use Darvis\SupplydriveApi\SupplydriveSender;
+
+$result = app(SupplydriveSender::class)->send($ublXml, $invoice->invoice_nr);
+
+$invoice->update(['peppol_sent_at' => now(), 'peppol_message_id' => $result->messageId]);
+```
+
+A refused document throws, a timeout may still mean it arrived; the [Sending](sending.md) page has the whole story.
+
 ## A complete example: record the delivery
 
 An application that sends invoices through Supplydrive wants to know, later, whether they arrived. A scheduled command that runs a few times a day is the right place: the lookup is one HTTP call per invoice, and a 5xx or a timeout can wait for the next run.
@@ -122,6 +136,7 @@ The HTTP response of a send through Supplydrive carries the message id. Store it
 
 ## Next
 
+- [Sending](sending.md): the send account, the message id and why nothing is retried.
 - [How it works](concepts.md): the login, the token cache, the repeat after a 401 and the timeouts.
 - [API reference](api-reference.md): every method and what it returns.
 - [Testing](testing.md): fake Supplydrive in the tests of the command above.
