@@ -73,6 +73,10 @@ A POST is not idempotent: a document that is sent twice is delivered twice, and 
 
 Send from a queued job, not from a web request: the request takes as long as Supplydrive needs, and the job can look the status up afterwards.
 
+## Is Supplydrive up?
+
+`php artisan supplydrive:health` checks the portal and the send endpoint without sending a document, and `$sender->healthCheck()` does the same in code (it never throws). Run it from a scheduled command and alert on `ok()` being false, so you hear about a dead endpoint or a changed password before the first invoice of the day fails.
+
 ## From the terminal
 
 ```bash

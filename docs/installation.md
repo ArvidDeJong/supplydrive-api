@@ -124,6 +124,6 @@ The portal did not accept the username and password.
 
 The login worked, but the account may not read these messages or lacks the role for the endpoint. Ask Supplydrive.
 
-To check the send account, send a document you want delivered: `php artisan supplydrive:send path/to/invoice.xml`. It sends for real; see [Sending](sending.md).
+To check both accounts without sending anything, run `php artisan supplydrive:health`: it logs in at the portal, looks up a reference that does not exist, and does one `GET` on the send endpoint. Exit code 0 means both answer and accept their account. To check the send account with a real document: `php artisan supplydrive:send path/to/invoice.xml`, which sends for real; see [Sending](sending.md).
 
 The [troubleshooting page](troubleshooting.md) has every message with its cause and fix.

@@ -149,9 +149,23 @@ try {
 }
 ```
 
+### Is Supplydrive up?
+
+```php
+$portal = app(SupplydriveClient::class)->healthCheck();   // login + lookup of a reference that does not exist
+$send = app(SupplydriveSender::class)->healthCheck();     // one GET with basic auth, no document
+
+if (! $portal->ok() || ! $send->ok()) {
+    // $result->reachable, ->authenticated (true/false/null), ->httpStatus, ->message, ->durationMs
+}
+```
+
+Neither throws, and nothing reaches the PEPPOL network. Schedule `php artisan supplydrive:health` (exit 1 when unhealthy) or call these from a "test connection" button. A 401 or 403 is a wrong account, a timeout is a dead endpoint, a 5xx is reachable with an unknown verdict.
+
 ### From the terminal
 
 ```bash
+php artisan supplydrive:health   # both endpoints, exit 0 when healthy
 php artisan supplydrive:send storage/app/peppol/F260001.xml --functional-id=F260001   # sends for real, prints the raw response
 php artisan supplydrive:status --functional-id=F260001
 php artisan supplydrive:status --message-id=1234

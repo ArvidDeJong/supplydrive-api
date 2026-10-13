@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Darvis\SupplydriveApi;
 
+use Darvis\SupplydriveApi\Console\Commands\HealthCommand;
 use Darvis\SupplydriveApi\Console\Commands\MessageStatusCommand;
 use Darvis\SupplydriveApi\Console\Commands\SendDocumentCommand;
 use Darvis\SupplydriveApi\Mcp\SupplydriveServer;
@@ -44,6 +45,7 @@ class SupplydriveApiServiceProvider extends ServiceProvider
             ], 'supplydrive-api-lang');
 
             $this->commands([
+                HealthCommand::class,
                 MessageStatusCommand::class,
                 SendDocumentCommand::class,
             ]);

@@ -253,6 +253,39 @@ class SupplydriveClient
     }
 
     /* -----------------------------------------------------------------
+     |  Health
+     | -----------------------------------------------------------------
+     */
+
+    /**
+     * Whether the portal answers and accepts the account: a login and one status lookup on a
+     * reference that does not exist. Supplydrive answers that with a 404, which is "reachable
+     * and accepted". Never throws; a timeout or a refusal is in the result.
+     */
+    public function healthCheck(): HealthResult
+    {
+        $started = hrtime(true);
+        $elapsed = fn (): int => (int) ((hrtime(true) - $started) / 1_000_000);
+
+        if ($this->username === '' || $this->password === '') {
+            return new HealthResult('portal', false, null, null, 'Supplydrive API config is incomplete (username, password).', $elapsed());
+        }
+
+        try {
+            $this->messageStatus(['functioneelId' => 'health-check-'.bin2hex(random_bytes(4))]);
+        } catch (ConnectionException $e) {
+            return new HealthResult('portal', false, null, null, 'Supplydrive portal did not answer: '.$this->redactSecrets($e->getMessage()), $elapsed());
+        } catch (SupplydriveException $e) {
+            $status = $e->status();
+            $refused = in_array($status, [400, 401, 403], true);
+
+            return new HealthResult('portal', $status > 0, $refused ? false : null, $status > 0 ? $status : null, $e->getMessage(), $elapsed());
+        }
+
+        return new HealthResult('portal', true, true, 200, 'Supplydrive portal answers and accepts the account.', $elapsed());
+    }
+
+    /* -----------------------------------------------------------------
      |  Token handling (grant_type = password)
      | -----------------------------------------------------------------
      */

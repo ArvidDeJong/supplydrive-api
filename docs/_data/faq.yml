@@ -45,7 +45,9 @@
     Only once, and only for a 401 on a token it already had: it logs in again and repeats the call.
     A 401 on a fresh token, a 5xx and a timeout are not retried, so look statuses up from a scheduled
     command or a queued job. A request gives up after 30 seconds, 10 to connect
-    (`SUPPLYDRIVE_TIMEOUT`, `SUPPLYDRIVE_CONNECT_TIMEOUT`).
+    (`SUPPLYDRIVE_TIMEOUT`, `SUPPLYDRIVE_CONNECT_TIMEOUT`). To see whether Supplydrive is up
+    without sending anything, run `php artisan supplydrive:health` or call `healthCheck()` on the
+    client or the sender; neither throws.
 
 - q: Is darvis/supplydrive-api safe with my portal password?
   a: >-
@@ -79,3 +81,4 @@
     a `SendResult` with the message id Supplydrive answered with; store it, it is the key for the
     status history. A refusal throws `SupplydriveException`, nothing is retried, and a timeout may
     still mean the document arrived, so look it up before you send again.
+

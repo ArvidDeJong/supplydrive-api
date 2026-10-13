@@ -31,6 +31,10 @@ All of them return `list<Message>` and throw the same exceptions.
 - `Darvis\SupplydriveApi\Exceptions\SupplydriveException` when Supplydrive refuses the login or the call, with the HTTP status in `status()`; `0` when the account is not configured. A 404 does not throw: it returns `[]`.
 - `Illuminate\Http\Client\ConnectionException` on a timeout or a connection error.
 
+### `healthCheck(): HealthResult`
+
+Logs in and looks up a reference that does not exist. Never throws. Healthy when Supplydrive answers the lookup (a 404 included) with the account accepted; a 400, 401 or 403 is "reachable, account refused", a 5xx is "reachable, account unknown", a timeout is "unreachable".
+
 ### `forgetToken(): void`
 
 Drops the access token in memory and in the cache. The next call logs in again.
@@ -47,6 +51,14 @@ Resolve it from the container (singleton, alias `supplydrive.sender`). It can be
 ### `send(string $ublXml, ?string $functionalId = null): SendResult`
 
 `POST` of the document to the send URL with basic authentication, `Content-Type: application/xml` and `Accept: application/json`. A 2xx gives a `SendResult`. Any 4xx or 5xx throws a `SupplydriveException` with the status; nothing is retried. A timeout is a `ConnectionException`. An empty document throws `InvalidArgumentException` before anything is sent. `$functionalId` only appears in the log lines of the package.
+
+### `healthCheck(): HealthResult`
+
+One `GET` with basic auth and no document to the send URL. Never throws, and nothing reaches the PEPPOL network. The endpoint only knows `POST`, so any answer that is not a 401, 403 or 5xx counts as reachable with the account accepted.
+
+## `Darvis\SupplydriveApi\HealthResult`
+
+Readonly. `endpoint` (`portal` or `send`), `reachable` (bool), `authenticated` (true, false, or null when the verdict is unknown or nothing was sent), `httpStatus` (?int), `message` (string), `durationMs` (int), and `ok(): bool`, which is reachable with the account accepted.
 
 ## `Darvis\SupplydriveApi\SendResult`
 
@@ -126,6 +138,10 @@ Prints the messages as a table with the description in the locale of the applica
 ## `php artisan supplydrive:send`
 
 `supplydrive:send {file} {--functional-id=}` reads the UBL document from the file and sends it. Prints the HTTP status, the message id (or that none was found) and the response body as it came. Exit code `0` when the document was accepted, `1` when Supplydrive refused it or could not be reached, `2` when the file does not exist or cannot be read.
+
+## `php artisan supplydrive:health`
+
+Runs both health checks and prints them as a table (endpoint, reachable, account, HTTP, time, message). Exit code `0` when both are healthy, `1` otherwise.
 
 ## MCP server
 

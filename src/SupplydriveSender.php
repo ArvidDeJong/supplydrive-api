@@ -89,6 +89,46 @@ class SupplydriveSender
         return SendResult::fromResponse($response->status(), $response->body());
     }
 
+    /**
+     * Whether the send endpoint answers and does not refuse the account: one GET with basic auth
+     * and no document. The endpoint only knows POST, so any answer (also a 405 or a 400) means it
+     * is up; a 401 or 403 means the account is wrong. Nothing is sent to the PEPPOL network.
+     * Never throws.
+     */
+    public function healthCheck(): HealthResult
+    {
+        $started = hrtime(true);
+        $elapsed = fn (): int => (int) ((hrtime(true) - $started) / 1_000_000);
+
+        if ($this->username === '' || $this->password === '') {
+            return new HealthResult('send', false, null, null, 'Supplydrive send config is incomplete (send.username, send.password).', $elapsed());
+        }
+
+        try {
+            $response = Http::withBasicAuth($this->username, $this->password)
+                ->withOptions([
+                    'connect_timeout' => $this->connectTimeout,
+                    'timeout' => $this->timeout,
+                ])
+                ->acceptJson()
+                ->get($this->url);
+        } catch (ConnectionException $e) {
+            return new HealthResult('send', false, null, null, 'Supplydrive send endpoint did not answer: '.$this->redactSecrets($e->getMessage()), $elapsed());
+        }
+
+        $status = $response->status();
+
+        if (in_array($status, [401, 403], true)) {
+            return new HealthResult('send', true, false, $status, "Supplydrive send endpoint refused the account (HTTP {$status}).", $elapsed());
+        }
+
+        if ($status >= 500) {
+            return new HealthResult('send', true, null, $status, "Supplydrive send endpoint answers with an error (HTTP {$status}).", $elapsed());
+        }
+
+        return new HealthResult('send', true, true, $status, "Supplydrive send endpoint answers (HTTP {$status}) and did not refuse the account.", $elapsed());
+    }
+
     protected function handleError(Response $response): void
     {
         $status = $response->status();

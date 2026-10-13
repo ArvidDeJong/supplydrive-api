@@ -6,7 +6,7 @@ description: "Every error message and log line of darvis/supplydrive-api, quoted
 
 # Troubleshooting
 
-Start with `php artisan supplydrive:status --functional-id=<an invoice number>`. It makes one lookup with your account and prints the same message your code would get. For a send, `php artisan supplydrive:send <file>` does the same, for real.
+Start with `php artisan supplydrive:status --functional-id=<an invoice number>`. It makes one lookup with your account and prints the same message your code would get. For a send, `php artisan supplydrive:send <file>` does the same, for real. `php artisan supplydrive:health` checks both endpoints without sending anything and says which one is unreachable or refuses its account.
 
 In code, read the HTTP status from the exception with `$e->status()` instead of taking it out of the message. `0` means there was no response at all.
 

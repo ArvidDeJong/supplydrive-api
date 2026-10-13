@@ -37,6 +37,7 @@ CI runs the tests on PHP 8.2 to 8.4 with Laravel 11, 12 and 13, on the lowest an
   - the methods of `Support\SupplydriveConfig`;
   - `Darvis\SupplydriveApi\SupplydriveSender`: `send()`, its protected methods and properties, the `supplydrive.sender` alias, that nothing is retried, and the exception texts `Supplydrive send failed. HTTP status: …` and `Supplydrive send config is incomplete (send.username, send.password).`;
   - `SendResult`: its constructor, its properties, `fromResponse()`, `extractMessageId()`, `hasMessageId()` and `MESSAGE_ID_KEYS`;
+  - `healthCheck()` on both classes, that it never throws, `HealthResult` with its constructor, its properties and `ok()`, and the `supplydrive:health` command with its exit codes;
   - the config keys `send.password`, `send.url`, `send.username` and the environment variables `SUPPLYDRIVE_SEND_PASSWORD`, `SUPPLYDRIVE_SEND_URL`, `SUPPLYDRIVE_SEND_USERNAME`, and the `supplydrive:send` command, its arguments and its exit codes.
 - The client throws `SupplydriveException` only, never a plain `RuntimeException`, and never wraps `Illuminate\Http\Client\ConnectionException`: host apps catch that class.
 - The password and the token never go into a URL, and every message built from a response goes through `redactSecrets()`. The token only goes into the cache encrypted, under a key that holds a hash of the account, never the account itself.

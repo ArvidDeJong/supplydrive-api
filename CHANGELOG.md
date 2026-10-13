@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-13
+
+### Added
+- `SupplydriveClient::healthCheck()` and `SupplydriveSender::healthCheck()`, which never throw and
+  return a `Darvis\SupplydriveApi\HealthResult` (`endpoint`, `reachable`, `authenticated`,
+  `httpStatus`, `message`, `durationMs`, `ok()`). The portal check logs in and looks up a reference
+  that does not exist (a 404 is healthy); the send check does one GET with basic auth and no
+  document, so nothing reaches the PEPPOL network. A 401 or 403 means the account is refused, a
+  timeout means unreachable, a 5xx means reachable with an unknown verdict on the account.
+- `php artisan supplydrive:health`, which prints both checks as a table and exits with 0 when both
+  are healthy, 1 otherwise, for a scheduler or a monitor.
+
 ## [1.2.0] - 2026-10-13
 
 ### Added

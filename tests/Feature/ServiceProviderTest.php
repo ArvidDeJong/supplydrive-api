@@ -1,5 +1,6 @@
 <?php
 
+use Darvis\SupplydriveApi\Console\Commands\HealthCommand;
 use Darvis\SupplydriveApi\Console\Commands\MessageStatusCommand;
 use Darvis\SupplydriveApi\Console\Commands\SendDocumentCommand;
 use Darvis\SupplydriveApi\SupplydriveApiServiceProvider;
@@ -69,4 +70,9 @@ it('offers the config file and the translations for publishing', function () {
     expect($lang)->toHaveCount(1)
         ->and(array_key_first($lang))->toEndWith('resources/lang')
         ->and(array_values($lang)[0])->toBe(app()->langPath('vendor/supplydrive-api'));
+});
+
+it('registers the supplydrive:health command', function () {
+    expect(app(Kernel::class)->all())->toHaveKey('supplydrive:health')
+        ->and(app(Kernel::class)->all()['supplydrive:health'])->toBeInstanceOf(HealthCommand::class);
 });

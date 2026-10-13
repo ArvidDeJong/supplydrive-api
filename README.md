@@ -18,7 +18,8 @@ It does not build the UBL document; [darvis/ubl-peppol](https://github.com/Arvid
 - **Descriptions in English and Dutch** - `$message->description()` in the locale of your application
 - **Failures with a status** - a `SupplydriveException` with the HTTP status in `$e->status()`; a 404 is simply an empty list
 - **Safe with your password** - never in a URL, and replaced by `[redacted]` in error messages, log lines and command output
-- **Two connection tests** - `php artisan supplydrive:status --functional-id=F260001` and `php artisan supplydrive:send invoice.xml`
+- **Connection tests** - `php artisan supplydrive:status --functional-id=F260001`, `php artisan supplydrive:send invoice.xml`, and `php artisan supplydrive:health`, which checks both endpoints without sending anything
+- **Health checks in code** - `healthCheck()` on the client and the sender never throws and tells you reachable, account accepted, HTTP status and duration
 - **An MCP server** - `php artisan mcp:start supplydrive` gives Claude and other AI agents the `lookup-message-status` and `explain-statuses` tools, registered when `laravel/mcp` is installed
 - **Laravel Boost** - guideline and skill included, so an AI assistant in your app knows the API
 
