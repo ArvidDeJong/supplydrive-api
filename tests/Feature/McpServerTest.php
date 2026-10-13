@@ -14,11 +14,15 @@ it('registers the local server under the configured handle', function () {
 });
 
 it('leaves the server out when it is disabled', function () {
+    // The handle is read when the registrar is resolved, so resolve it first: the registration
+    // of the real boot then happened under 'supplydrive', and a second boot must add nothing.
+    app(Registrar::class);
     config(['supplydrive.mcp.enabled' => false, 'supplydrive.mcp.handle' => 'other']);
 
     (new SupplydriveApiServiceProvider(app()))->boot();
 
-    expect(app(Registrar::class)->getLocalServer('other'))->toBeNull();
+    expect(app(Registrar::class)->getLocalServer('other'))->toBeNull()
+        ->and(app(Registrar::class)->getLocalServer('supplydrive'))->not->toBeNull();
 });
 
 it('looks a message up by the invoice number through the tool', function () {
@@ -64,8 +68,7 @@ it('names failed and pending messages as such', function () {
         ->assertSee('3 message(s)')
         ->assertSee('Status: Mapping gefaald (failed, somebody has to act)')
         ->assertSee('Status: In verwerking (pending, ask again later)')
-        ->assertSee('Message 3, interface 1000')
-        ->assertSee('Status: Something new (pending, ask again later)')
+        ->assertSee("Message 3\nStatus: Something new (pending, ask again later)")
         ->assertSee('Unknown status.');
 });
 
